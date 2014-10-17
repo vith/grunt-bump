@@ -177,13 +177,24 @@ module.exports = function(grunt) {
 
     // PUSH CHANGES
     runIf(opts.push, function() {
-      exec('git push ' + opts.pushTo + ' && git push ' + opts.pushTo + ' --tags', function(err, stdout, stderr) {
-        if (err) {
-          grunt.fatal('Can not push to ' + opts.pushTo + ':\n  ' + stderr);
-        }
-        grunt.log.ok('Pushed to ' + opts.pushTo);
-        next();
-      });
+      var push = function (remote) {
+        exec('git push ' + opts.pushTo + ' && git push ' + opts.pushTo + ' --tags', function(err, stdout, stderr) {
+          if (err) {
+            grunt.fatal('Can not push to ' + opts.pushTo + ':\n  ' + stderr);
+          }
+          grunt.log.ok('Pushed to ' + opts.pushTo);
+        });
+      };
+
+      if (opts.pushTo instanceof Array) {
+        opts.pushTo.forEach(function(remote) {
+          push(remote);
+        });
+      } else {
+        push(opts.pushTo);
+      }
+
+      next();
     });
 
     next();
